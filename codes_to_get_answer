@@ -1,0 +1,152 @@
+
+# Q1 & Q2: Find stock with lowest average daily return in 2008
+if 2008 in DM_Ret_dict['Daily'].index.year.unique():
+    daily_avg_2008 = get_avg(DM_Ret_dict["Daily"], 2008)
+    lowest_ticker = daily_avg_2008.idxmin()
+    lowest_return = daily_avg_2008.min()
+    Q1_ANSWER = lowest_ticker
+    Q2_ANSWER = f"{lowest_return:.4f}"
+    print(f"Q1: {Q1_ANSWER} - Lowest average daily return in 2008: {Q2_ANSWER}")
+else:
+    Q1_ANSWER = "no data for 2008"
+    Q2_ANSWER = "no data for 2008"
+    print("No data for 2008 in daily returns")
+
+# Q3 & Q4: Find stock with highest average monthly return in 2019
+monthly_years = set()
+if isinstance(DM_Ret_dict['Monthly'].index, pd.PeriodIndex):
+    monthly_years = set(period.year for period in DM_Ret_dict['Monthly'].index)
+else:
+    monthly_years = set(DM_Ret_dict['Monthly'].index.year)
+
+if 2019 in monthly_years:
+    monthly_avg_2019 = get_avg(DM_Ret_dict["Monthly"], 2019)
+    highest_ticker = monthly_avg_2019.idxmax()
+    highest_return = monthly_avg_2019.max()
+    Q3_ANSWER = highest_ticker
+    Q4_ANSWER = f"{highest_return:.4f}"
+    print(f"Q3: {Q3_ANSWER} - Highest average monthly return in 2019: {Q4_ANSWER}")
+else:
+    Q3_ANSWER = "no data for 2019"
+    Q4_ANSWER = "no data for 2019"
+    print("No data for 2019 in monthly returns")
+
+# Q5: Average monthly total volatility for 10th stock in 2010
+sorted_tickers = sorted([t.lower() for t in cfg.TICKERS])
+ticker_10 = sorted_tickers[9]
+col_10_vol = f"{ticker_10}_vol"
+print(f"10th stock is: {ticker_10}")
+
+vol_years = set()
+if isinstance(Vol_Ret_mrg_df.index, pd.PeriodIndex):
+    vol_years = set(period.year for period in Vol_Ret_mrg_df.index)
+else:
+    vol_years = set(Vol_Ret_mrg_df.index.year)
+
+if 2010 in vol_years and col_10_vol in Vol_Ret_mrg_df.columns:
+    vol_avg_2010 = get_avg(Vol_Ret_mrg_df[[col_10_vol]], 2010)[0]
+    Q5_ANSWER = f"{vol_avg_2010:.4f}"
+    print(f"Q5: Average monthly volatility for {ticker_10} in 2010: {Q5_ANSWER}")
+else:
+    Q5_ANSWER = "no data for 2010"
+    if 2010 not in vol_years:
+        print("No data for 2010 in volatility data")
+    if col_10_vol not in Vol_Ret_mrg_df.columns:
+        print(f"{col_10_vol} not in volatility data")
+# Q6: Ratio of average monthly volatility for 20th stock in 2008 vs 2018
+ticker_20 = sorted_tickers[19]
+col_20_vol = f"{ticker_20}_vol"
+print(f"20th stock is: {ticker_20}")
+
+if (2008 in vol_years and
+        2018 in vol_years and
+        col_20_vol in Vol_Ret_mrg_df.columns):
+    vol_20_2008 = get_avg(Vol_Ret_mrg_df[[col_20_vol]], 2008)[0]
+    vol_20_2018 = get_avg(Vol_Ret_mrg_df[[col_20_vol]], 2018)[0]
+    ratio = vol_20_2008 / vol_20_2018
+    Q6_ANSWER = f"{ratio:.1f}"
+    print(f"Q6: Ratio of volatility for {ticker_20} (2008/2018): {Q6_ANSWER}")
+else:
+    Q6_ANSWER = "insufficient data"
+    if 2008 not in vol_years:
+        print("No data for 2008 in volatility data")
+    if 2018 not in vol_years:
+        print("No data for 2018 in volatility data")
+    if col_20_vol not in Vol_Ret_mrg_df.columns:
+        print(f"{col_20_vol} not in volatility data")
+
+# Q7: Number of effective year-month for 30th stock in 2010
+ticker_30 = sorted_tickers[29]
+col_30 = ticker_30
+col_30_vol = f"{col_30}_vol"
+print(f"30th stock is: {ticker_30}")
+
+if 2010 in vol_years and col_30 in Vol_Ret_mrg_df.columns and col_30_vol in Vol_Ret_mrg_df.columns:
+    # Filter for 2010
+    if isinstance(Vol_Ret_mrg_df.index, pd.PeriodIndex):
+        df_2010 = Vol_Ret_mrg_df[Vol_Ret_mrg_df.index.astype(str).str.startswith('2010')]
+    else:
+        df_2010 = Vol_Ret_mrg_df[Vol_Ret_mrg_df.index.year == 2010]
+
+    effective_rows = df_2010[[col_30, col_30_vol]].dropna().shape[0]
+    Q7_ANSWER = str(effective_rows)
+    print(f"Q7: Effective rows for {ticker_30} in 2010: {Q7_ANSWER}")
+else:
+    Q7_ANSWER = "0"
+    if 2010 not in vol_years:
+        print("No data for 2010 in volatility data")
+    if col_30 not in Vol_Ret_mrg_df.columns:
+        print(f"{ticker_30} not in returns data")
+    if col_30_vol not in Vol_Ret_mrg_df.columns:
+        print(f"{ticker_30}_vol not in volatility data")
+
+# Q8: Number of rows and columns in EW_LS_pf_df
+rows, cols = EW_LS_pf_df.shape
+Q8_ANSWER = f"{rows},{cols}"
+print(f"Q8: EW_LS_pf_df shape: {Q8_ANSWER}")
+
+# Q9: Average return of lowest volatility quantile in 2019
+pf_years = set()
+if isinstance(EW_LS_pf_df.index, pd.PeriodIndex):
+    pf_years = set(period.year for period in EW_LS_pf_df.index)
+else:
+    pf_years = set(EW_LS_pf_df.index.year)
+
+if 2019 in pf_years and 'ewp_rank_1' in EW_LS_pf_df.columns:
+    # Filter for 2019
+    if isinstance(EW_LS_pf_df.index, pd.PeriodIndex):
+        df_2019 = EW_LS_pf_df[EW_LS_pf_df.index.astype(str).str.startswith('2019')]
+    else:
+        df_2019 = EW_LS_pf_df[EW_LS_pf_df.index.year == 2019]
+
+    avg_return_2019 = df_2019['ewp_rank_1'].mean()
+    Q9_ANSWER = f"{avg_return_2019:.4f}"
+    print(f"Q9: Average return of lowest volatility quantile in 2019: {Q9_ANSWER}")
+else:
+    Q9_ANSWER = "no data for 2019"
+    if 2019 not in pf_years:
+        print("No data for 2019 in portfolio returns")
+    if 'ewp_rank_1' not in EW_LS_pf_df.columns:
+        print("No ewp_rank_1 column in portfolio returns")
+
+# Q10: Cumulative return of volatility long-short portfolio
+if 'ls' in EW_LS_pf_df.columns:
+    ls_cumulative = get_cumulative_ret(EW_LS_pf_df[['ls']])['ls']
+    Q10_ANSWER = f"{ls_cumulative:.4f}"
+    print(f"Q10: Cumulative return of long-short portfolio: {Q10_ANSWER}")
+else:
+    Q10_ANSWER = "no data for long-short portfolio"
+    print("No ls column in portfolio returns")
+
+# Print a summary of all answers
+print("\nSummary of answers:")
+print(f"Q1_ANSWER = '{Q1_ANSWER}'")
+print(f"Q2_ANSWER = '{Q2_ANSWER}'")
+print(f"Q3_ANSWER = '{Q3_ANSWER}'")
+print(f"Q4_ANSWER = '{Q4_ANSWER}'")
+print(f"Q5_ANSWER = '{Q5_ANSWER}'")
+print(f"Q6_ANSWER = '{Q6_ANSWER}'")
+print(f"Q7_ANSWER = '{Q7_ANSWER}'")
+print(f"Q8_ANSWER = '{Q8_ANSWER}'")
+print(f"Q9_ANSWER = '{Q9_ANSWER}'")
+print(f"Q10_ANSWER = '{Q10_ANSWER}'")
